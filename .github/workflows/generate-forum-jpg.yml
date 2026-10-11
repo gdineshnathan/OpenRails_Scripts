@@ -1,0 +1,41 @@
+name: Generate forum JPG
+on:
+  push:
+    branches:
+      - forum-station-occupancy-image
+    paths:
+      - 'forum/Station_to_Station_Occupancy_Request.svg'
+      - '.github/workflows/generate-forum-jpg.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install --disable-pip-version-check cairosvg pillow
+      - name: Convert SVG to JPEG
+        run: |
+          python - <<'PY'
+          import cairosvg
+          from PIL import Image
+          from io import BytesIO
+          p='forum/Station_to_Station_Occupancy_Request.svg'
+          png=cairosvg.svg2png(url=p,output_width=1800)
+          im=Image.open(BytesIO(png)).convert('RGB')
+          im.save('forum/Station_to_Station_Occupancy_Request.jpg', 'JPEG', quality=83, optimize=True)
+          PY
+      - name: Commit JPG
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add forum/Station_to_Station_Occupancy_Request.jpg
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Add JPG rendering of station occupancy diagram"
+          git push
