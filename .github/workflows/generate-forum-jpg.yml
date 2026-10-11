@@ -30,12 +30,16 @@ jobs:
           png=cairosvg.svg2png(url=p,output_width=1800)
           im=Image.open(BytesIO(png)).convert('RGB')
           im.save('forum/Station_to_Station_Occupancy_Request.jpg', 'JPEG', quality=83, optimize=True)
+          # Smaller version designed to fit conventional forum post widths
+          thumb=cairosvg.svg2png(url=p,output_width=680)
+          small=Image.open(BytesIO(thumb)).convert('RGB')
+          small.save('forum/Station_to_Station_Occupancy_Request_680.jpg', 'JPEG', quality=87, optimize=True)
           PY
       - name: Commit JPG
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -f forum/Station_to_Station_Occupancy_Request.jpg
+          git add -f forum/Station_to_Station_Occupancy_Request.jpg forum/Station_to_Station_Occupancy_Request_680.jpg
           if git diff --cached --quiet; then exit 0; fi
           git commit -m "Add JPG rendering of station occupancy diagram"
           git push
